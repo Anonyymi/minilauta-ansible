@@ -1,0 +1,23 @@
+---
+
+- name: install memcached apt pkgs
+  apt:
+    name:
+      - memcached
+      - libmemcached-tools
+    update_cache: no
+  register: memcached_apt
+
+- name: install memcached conf
+  template:
+    src: memcached.conf.j2
+    dest: /etc/memcached.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: enable memcached services
+  systemd:
+    name: memcached
+    state: restarted
+    enabled: yes

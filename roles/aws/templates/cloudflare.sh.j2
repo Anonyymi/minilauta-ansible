@@ -1,0 +1,24 @@
+#!/bin/bash
+
+DATE=$(date)
+echo "cloudflare.sh: current date is $DATE ..."
+
+echo "cloudflare.sh: fetch ipv4 ranges ..."
+wget https://www.cloudflare.com/ips-v4
+
+echo "cloudflare.sh: configure security group ..."
+while read p;
+do
+  # get the IP
+  IP=$p;
+  # allow HTTP
+  aws ec2 authorize-security-group-ingress --region {{ aws.region }} \
+    --group-id {{ aws.security_group_id }} \
+    --ip-permissions IpProtocol=tcp,FromPort=80,ToPort=80,IpRanges="[{CidrIp=$IP,Description='Cloudflare HTTP $DATE'}]"
+  # allow HTTPS
+  aws ec2 authorize-security-group-ingress --region {{ aws.region }} \
+    --group-id {{ aws.security_group_id }} \
+    --ip-permissions IpProtocol=tcp,FromPort=443,ToPort=443,IpRanges="[{CidrIp=$IP,Description='Cloudflare HTTPS $DATE'}]"
+done < ips-v4
+
+echo "cloudflare.sh: done!\n\n"

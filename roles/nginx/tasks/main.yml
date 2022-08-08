@@ -1,0 +1,77 @@
+---
+
+- name: install nginx apt pkgs
+  apt:
+    name:
+      - nginx
+    update_cache: no
+  register: nginx_apt
+
+- name: configure nginx
+  template:
+    src: "{{ item.src }}"
+    dest: "/etc/nginx/{{ item.dest }}"
+    owner: root
+    mode: "0644"
+  with_items:
+    - src: nginx.conf.j2
+      dest: nginx.conf
+    - src: mime.types.j2
+      dest: mime.types
+    - src: fastcgi_params.j2
+      dest: fastcgi_params
+
+- name: check if nginx can enable tls (acme)
+  stat:
+    path: "/etc/letsencrypt/certs/{{ acme.common_name }}-fullchain.crt"
+  register: nginx_tls_acme
+
+- name: check if nginx can enable tls (self-signed)
+  stat:
+    path: "/etc/tls/certs/{{ tls.common_name }}.crt"
+  register: nginx_tls_tls
+
+- name: enable nginx tls (acme)
+  set_fact:
+    nginx_tls_enabled: true
+    nginx_tls_common_name: "{{ acme.common_name }}"
+    nginx_tls_certificate: "/etc/letsencrypt/certs/{{ acme.common_name }}-fullchain.crt"
+    nginx_tls_certificate_key: "/etc/letsencrypt/keys/{{ acme.common_name }}.pem"
+  when: nginx_tls_acme.stat.exists
+
+- name: enable nginx tls (self-signed)
+  set_fact:
+    nginx_tls_enabled: true
+    nginx_tls_common_name: "{{ tls.common_name }}"
+    nginx_tls_certificate: "/etc/tls/certs/{{ tls.common_name }}.crt"
+    nginx_tls_certificate_key: "/etc/tls/keys/{{ tls.common_name }}.pem"
+  when: nginx_tls_tls.stat.exists
+
+- name: disable nginx tls
+  set_fact:
+    nginx_tls_enabled: false
+    nginx_tls_common_name: "localhost"
+  when: not nginx_tls_acme.stat.exists and not nginx_tls_tls.stat.exists
+
+- name: install nginx sites
+  template:
+    src: "{{ item.src }}"
+    dest: "/etc/nginx/sites-enabled/{{ item.dest }}"
+    owner: root
+    mode: "0744"
+  with_items:
+    - src: sites-enabled/default.j2
+      dest: default
+
+- name: init /var/www
+  file:
+    path: /var/www
+    recurse: yes
+    owner: www-data
+    group: www-data
+
+- name: enable nginx services
+  systemd:
+    name: nginx
+    state: restarted
+    enabled: yes

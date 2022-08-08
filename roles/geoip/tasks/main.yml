@@ -1,0 +1,31 @@
+---
+
+- name: create geoip directory
+  file:
+    path: /usr/share/GeoIP
+    state: directory
+    mode: '0755'
+
+- name: download geoip database (IPv4)
+  get_url:
+    url: https://mailfud.org/geoip-legacy/GeoIP.dat.gz
+    force: yes
+    dest: /usr/share/GeoIP/GeoIP.dat.gz
+    mode: '0444'
+  ignore_errors: true
+
+- name: download geoip database (IPv6)
+  get_url:
+    url: https://mailfud.org/geoip-legacy/GeoIPv6.dat.gz
+    force: yes
+    dest: /usr/share/GeoIP/GeoIPv6.dat.gz
+    mode: '0444'
+  ignore_errors: true
+
+- name: extract geoip database (IPv4)
+  command: gzip -fd /usr/share/GeoIP/GeoIP.dat.gz
+  ignore_errors: true
+
+- name: extract geoip database (IPv6)
+  command: gzip -fd /usr/share/GeoIP/GeoIPv6.dat.gz
+  ignore_errors: true

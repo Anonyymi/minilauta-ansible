@@ -1,0 +1,59 @@
+---
+
+- name: bootstrap machine
+  hosts:
+    - prod
+    - test
+  gather_facts: yes
+  tasks:
+    - name: update apt and install apt pkgs
+      become: yes
+      apt:
+        name:
+          - python3
+          - python3-pip
+        update_cache: yes
+
+- name: provision machine
+  hosts: all
+  gather_facts: yes
+  roles:
+    - role: ufw
+      become: yes
+      when: ufw.enabled == true
+    - role: aws
+      become: yes
+      when: aws.enabled == true
+    - role: git
+      become: yes
+    - role: mariadb
+      become: yes
+    - role: memcached
+      become: yes
+    - role: nginx
+      become: yes
+    - role: acme
+      become: yes
+      when: acme.enabled == true
+    - role: tls
+      become: yes
+      when: tls.enabled == true
+    - role: geoip
+      become: yes
+      when: geoip.enabled == true
+    - role: php
+      become: yes
+    - role: tinyib
+      become: yes
+      become_user: www-data
+
+- name: restart services
+  hosts: all
+  gather_facts: yes
+  tasks:
+    - name: restart php services
+      become: yes
+      systemd:
+        name: "php{{ php.version }}-fpm"
+        state: restarted
+        enabled: yes

@@ -1,0 +1,19 @@
+# vagrant
+.vagrant/
+
+# files ansible creates
+composer-setup.php
+
+# ansible inventories
+inventories/prod
+inventories/group_vars/prod
+
+# temporary files and dirs
+tmp/
+
+# host ssh keys for deploy machine
+ssh/
+
+# prod ssh keys for gitlab access
+roles/git/files/gitlab_access
+roles/git/files/gitlab_access.pub

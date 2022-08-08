@@ -1,0 +1,42 @@
+---
+
+- name: install tls apt pkgs
+  apt:
+    name:
+      - openssl
+    update_cache: no
+  register: tls_apt
+
+- name: initialize tls directories
+  file:
+    path: "/etc/tls/{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=x,o=x
+  with_items:
+    - certs
+    - csrs
+    - keys
+
+- name: generate tls domain private key
+  community.crypto.openssl_privatekey:
+    path: "/etc/tls/keys/{{ tls.common_name }}.pem"
+
+- name: generate tls certificate signing request
+  community.crypto.openssl_csr:
+    path: "/etc/tls/csrs/{{ tls.common_name }}.csr"
+    privatekey_path: "/etc/tls/keys/{{ tls.common_name }}.pem"
+
+- name: generate tls certificate
+  community.crypto.x509_certificate:
+    provider: selfsigned
+    path: "/etc/tls/certs/{{ tls.common_name }}.crt"
+    privatekey_path: "/etc/tls/keys/{{ tls.common_name }}.pem"
+    csr_path: "/etc/tls/csrs/{{ tls.common_name }}.csr"
+  register: tls_cert
+
+- name: re-initialize nginx role
+  include_role:
+    name: nginx
+  when: tls_cert is changed

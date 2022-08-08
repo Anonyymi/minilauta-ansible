@@ -1,0 +1,108 @@
+---
+
+- name: install tinyib apt pkgs
+  become: yes
+  become_user: root
+  apt:
+    name:
+      - imagemagick
+      - ffmpeg
+      - exiftool
+      - acl
+    update_cache: no
+  register: tinyib_apt
+
+- name: clone tinyib
+  become: yes
+  become_user: root
+  git:
+    repo: git@github.com:Anonyymi/minilauta-tinyib.git
+    key_file: /root/.ssh/gitlab_access
+    dest: /var/www/tinyib.git
+    single_branch: yes
+    version: master
+  register: tinyib_git
+
+- name: init tinyib boards
+  file:
+    path: "/var/www/tinyib/{{ item.board }}"
+    recurse: yes
+    owner: www-data
+    group: www-data
+  with_items: "{{ tinyib.boards }}"
+
+- name: synchronize tinyib boards
+  synchronize:
+    src: /var/www/tinyib.git/
+    dest: "/var/www/tinyib/{{ item.board }}"
+    rsync_opts:
+      - "--exclude=.git/"
+      - "--exclude=.gitignore"
+      - "--exclude=README.md"
+      - "--exclude=LICENSE"
+  delegate_to: "{{ inventory_hostname }}"
+  with_items: "{{ tinyib.boards }}"
+
+- name: configure tinyib boards
+  template:
+    src: settings.php.j2
+    dest: "/var/www/tinyib/{{ item.board }}/settings.php"
+    owner: www-data
+    mode: "0640"
+  with_items: "{{ tinyib.boards }}"
+  tags:
+    - configure
+
+- name: initialize tinyib boards
+  uri:
+    url: http://localhost/{{ item.board }}/imgboard.php
+    validate_certs: no
+  with_items: "{{ tinyib.boards }}"
+  when: tinyib.init == true
+
+- name: synchronize tinyib main page
+  synchronize:
+    src: /var/www/tinyib.git/
+    dest: "/var/www/tinyib"
+    rsync_opts:
+      - "--include=favicon.ico"
+      - "--include=css/***"
+      - "--include=js/***"
+      - "--include=loadstyle.php"
+      - "--exclude=*"
+  delegate_to: "{{ inventory_hostname }}"
+
+- name: configure tinyib main page
+  template:
+    src: "{{ item.src }}"
+    dest: "/var/www/tinyib/{{ item.dest }}"
+    owner: www-data
+    mode: "0640"
+  with_items:
+    - src: index.php.j2
+      dest: index.php
+    - src: index.css.j2
+      dest: css/index.css
+    - src: robots.txt.j2
+      dest: robots.txt
+    - src: privacy.txt.j2
+      dest: privacy.txt
+  tags:
+    - configure
+
+- name: install logo
+  copy:
+    src: logo.png
+    dest: "/var/www/tinyib/"
+    owner: www-data
+    group: www-data
+    mode: "0640"
+
+- name: install banners
+  copy:
+    src: banners/
+    dest: "/var/www/tinyib/banners/"
+    owner: www-data
+    group: www-data
+    mode: "0640"
+  when: tinyib.install_banners == true

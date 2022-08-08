@@ -1,0 +1,92 @@
+---
+
+- name: install letsencrypt apt pkgs
+  apt:
+    name:
+      - openssl
+    update_cache: no
+  register: letsencrypt_apt
+
+- name: initialize letsencrypt directories
+  file:
+    path: "/etc/letsencrypt/{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=x,o=x
+  with_items:
+    - account
+    - certs
+    - csrs
+    - keys
+
+- name: generate letsencrypt account private key
+  community.crypto.openssl_privatekey:
+    path: "/etc/letsencrypt/account/key.pem"
+
+- name: generate letsencrypt domain private key
+  community.crypto.openssl_privatekey:
+    path: "/etc/letsencrypt/keys/{{ acme.common_name }}.pem"
+
+- name: generate letsencrypt certificate signing request
+  community.crypto.openssl_csr:
+    path: "/etc/letsencrypt/csrs/{{ acme.common_name }}.csr"
+    privatekey_path: "/etc/letsencrypt/keys/{{ acme.common_name }}.pem"
+    country_name: "{{ acme.country_name }}"
+    email_address: "{{ acme.email_address }}"
+    common_name: "{{ acme.common_name }}"
+    subject_alt_name: "{{ acme.subject_alt_name }}"
+
+- name: create letsencrypt challenge for domain
+  community.crypto.acme_certificate:
+    acme_directory: "{{ acme.acme_directory }}"
+    acme_version: "{{ acme.acme_version }}"
+    account_key_src: "/etc/letsencrypt/account/key.pem"
+    account_email: "{{ acme.email_address }}"
+    csr: "/etc/letsencrypt/csrs/{{ acme.common_name }}.csr"
+    dest: "/etc/letsencrypt/certs/{{ acme.common_name }}.crt"
+    fullchain_dest: "/etc/letsencrypt/certs/{{ acme.common_name }}-fullchain.crt"
+    remaining_days: "{{ acme.remaining_days }}"
+    terms_agreed: "{{ acme.terms_agreed }}"
+    challenge: http-01
+  register: acme_challenge
+
+- name: initialize letsencrypt challenge directory
+  file:
+    path: /var/www/html/.well-known/acme-challenge
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: u=rwx,g=rx,o=rx
+  when: acme_challenge is changed
+
+- name: copy letsencrypt http-01 challenge resources
+  copy:
+    content: "{{ acme_challenge['challenge_data'][item]['http-01']['resource_value'] }}"
+    dest: "/var/www/html/{{ acme_challenge['challenge_data'][item]['http-01']['resource'] }}"
+    owner: www-data
+    group: www-data
+    mode: u=rw,g=r,o=r
+  with_items: "{{ acme.challenge_subject_names }}"
+  when: acme_challenge is changed
+
+- name: complete letsencrypt challenge for domain
+  community.crypto.acme_certificate:
+    acme_directory: "{{ acme.acme_directory }}"
+    acme_version: "{{ acme.acme_version }}"
+    account_key_src: "/etc/letsencrypt/account/key.pem"
+    account_email: "{{ acme.email_address }}"
+    csr: "/etc/letsencrypt/csrs/{{ acme.common_name }}.csr"
+    dest: "/etc/letsencrypt/certs/{{ acme.common_name }}.crt"
+    fullchain_dest: "/etc/letsencrypt/certs/{{ acme.common_name }}-fullchain.crt"
+    chain_dest: "/etc/letsencrypt/certs/{{ acme.common_name }}-chain.crt"
+    remaining_days: "{{ acme.remaining_days }}"
+    terms_agreed: "{{ acme.terms_agreed }}"
+    challenge: http-01
+    data: "{{ acme_challenge }}"
+  when: acme_challenge is changed
+
+- name: re-initialize nginx role
+  include_role:
+    name: nginx
+  when: acme_challenge is changed

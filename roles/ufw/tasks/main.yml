@@ -1,0 +1,27 @@
+---
+
+- name: install ufw apt pkgs
+  apt:
+    name:
+      - ufw
+    update_cache: no
+  register: ufw_apt
+
+- name: set ufw to allow configured ports
+  community.general.ufw:
+    rule: allow
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+    from_ip: "{{ item.from_ip }}"
+  with_items: "{{ ufw.allow }}"
+
+- name: set ufw to ratelimit ssh port
+  community.general.ufw:
+    rule: limit
+    port: ssh
+    proto: tcp
+
+- name: enable ufw services and reject all by default
+  community.general.ufw:
+    state: enabled
+    policy: reject

@@ -1,0 +1,1338 @@
+---
+
+ufw:
+  enabled: true
+  allow:
+    - port: 22
+      proto: tcp
+      from_ip: "any"
+    - port: 80
+      proto: tcp
+      from_ip: "any"
+    - port: 443
+      proto: tcp
+      from_ip: "any"
+
+aws:
+  enabled: false
+  region: eu-north-1
+  security_group_id: sg-12345789
+
+nginx:
+  client_max_body_size: 32M
+
+acme:
+  enabled: false
+  acme_directory: https://acme-staging-v02.api.letsencrypt.org/directory
+  acme_version: 2
+  country_name: FI
+  email_address: vagrant@localhost.com
+  common_name: localhost.com
+  subject_alt_name:
+    - DNS:www.localhost.com
+  challenge_subject_names:
+    - localhost.com
+    - www.localhost.com
+  remaining_days: 30
+  terms_agreed: true
+
+tls:
+  enabled: true
+  common_name: "10.10.0.0"
+
+geoip:
+  enabled: false
+
+php:
+  version: 7.2
+  pkgs:
+    - common
+    - cli
+    - fpm
+    - opcache
+    - mysql
+    - memcached
+    - mbstring
+    - gd
+    - curl
+  mods:
+    - opcache
+    - pdo_mysql
+    - memcached
+    - mbstring
+    - gd
+    - curl
+  ini:
+    upload_max_filesize: 32M
+    max_file_uploads: 10
+    post_max_size: 40M
+    opcache_validate_timestamps: 1
+    opcache_revalidate_freq: 5
+
+mariadb:
+  host: localhost
+  database:
+    tinyib:
+      name: "tinyib_db"
+  user:
+    tinyib:
+      name: "tinyib_user"
+      password: "tinyib_user_pass"
+
+tinyib:
+  init: false
+  install_banners: false
+  main:
+    title: Minilauta
+    desc: Minilauta - Se perinteisempi kuvalauta
+    categories:
+      - name: '-'
+        boards:
+          - name: Ukko
+            key: ukko
+      - name: Luovuus SFW
+        boards:
+          - name: Kuvataide
+            key: kuv
+          - name: Musiikki
+            key: mus
+          - name: Tietokonekulttuuri
+            key: it
+      - name: Japani SFW
+        boards:
+          - name: Otaku
+            key: jp
+          - name: Anime
+            key: a
+          - name: Manga
+            key: m
+      - name: Muu SFW
+        boards:
+          - name: Hikikomori
+            key: hikky
+          - name: Paranormaali
+            key: x
+      - name: Sekalainen NSFW
+        boards:
+          - name: Satunnainen
+            key: b
+          - name: Poliittisesti epäkorrekti
+            key: pol
+          - name: International
+            key: int
+      - name: Aikuisviihde NSFW
+        boards:
+          - name: Hentai
+            key: h
+          - name: Ecchi
+            key: e
+      - name: Minilauta SFW
+        boards:
+          - name: Meta
+            key: meta
+    defaultstyle:
+      css: minilauta
+      name: Minilauta
+    alternatestyles:
+      - css: futaba
+        name: Futaba
+      - css: burichan
+        name: Burichan
+      - css: tomorrow
+        name: Tomorrow
+    rules: |
+      <h4>Website rules</h4>
+      <ul class="ruletable">
+        <li><strong>Prohibited on all boards</strong>
+          <ul>
+            <li>Illegal
+              <ul>
+                <li>Content that sexualizes minors</li>
+                <li>Content that is otherwise illegal</li>
+              </ul>
+            </li>
+            <li>Advertisements and scams
+              <ul>
+                <li>Advertisements of a commercial product</li>
+                <li>Uploading or linking malicious software</li>
+                <li>Phishing or sharing sensitive/personal information</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+
+        <li><strong>Prohibited on all SFW boards</strong>
+          <ul>
+            <li>NSFW
+              <ul>
+                <li>Pornography</li>
+                <li>Violence</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+      <p>
+        To report a post, press the "R" link next to the post ID.
+        <br>
+        If you need to contact us, you can do so via email: <a href="mailto:info@minilauta.org">info@minilauta.org</a>
+      </p>
+    robots:
+      user_agent: "*"
+      crawl_delay: 250
+      disallow_rules:
+        - "/"
+  common:
+    # i18n
+    locale: ""
+    timezone: Europe/Helsinki
+    datefmt: "%d/%m/%g(%a)%H:%M:%S"
+    # board desc / behavior
+    defaultstyle: minilauta
+    anonymous: Anonyymi
+    capcodes:
+      - label: Admin
+        color: red
+      - label: Mod
+        color: purple
+    stylesheets:
+      - css: minilauta
+        name: Minilauta
+      - css: futaba
+        name: Futaba
+      - css: burichan
+        name: Burichan
+      - css: tomorrow
+        name: Tomorrow
+    cloudflare: false
+    captcha: ""
+    replycaptcha: ""
+    reportcaptcha: ""
+    managecaptcha: ""
+    # hcaptcha
+    hcaptcha_site: ""
+    hcaptcha_secret: ""
+    # recaptcha
+    recaptcha_site: ""
+    recaptcha_secret: ""
+    # tripcode seed
+    tripseed: "123456789"
+    # management panel
+    managekey: ""
+    adminpass: "admin"
+    modpass: "mod"
+    # database
+    dbmode: pdo
+    dbaccounts: accounts
+    dbbans: bans
+    dbkeywords: keywords
+    dblogs: logs
+    dbposts: posts
+    dbreports: reports
+    dbmigrate: false
+    # database config mysql / postgres
+    dbhost: "{{ mariadb.host }}"
+    dbport: 3306
+    dbusername: "{{ mariadb.user.tinyib.name }}"
+    dbpassword: "{{ mariadb.user.tinyib.password }}"
+    dbname: "{{ mariadb.database.tinyib.name }}"
+    # database config pdo
+    dbdriver: mysql
+    dbdsn: ""
+  boards:
+    - # board desc / behavior
+      board: ukko
+      boarddesc: "Ukko"
+      alwaysnoko: true
+      report: true
+      autohide: 3
+      reqmod: ""
+      banmessage: true
+      updatebumped: true
+      spoilertext: true
+      spoilerimage: true
+      anonfile: true
+      duplicates: 0
+      overboard: true
+      autorefresh: 60
+      disallowthreads: ""
+      disallowreplies: ""
+      geoip: true
+      # board appearance
+      index: "index.html"
+      logo: ""
+      threadsperpage: 10
+      previewreplies: 3
+      truncate: 15
+      wordbreak: 80
+      expandwidth: 85
+      backlinks: false
+      catalog: true
+      json: false
+      hidefieldsop: []
+      hidefields: []
+      # post control
+      delay: 15
+      maxthreads: 200
+      maxreplies: 200
+      maxname: 75
+      maxemail: 320
+      maxsubject: 75
+      maxmessage: 8000
+      # upload types
+      uploads: []
+      # embed types
+      embeds:
+        - type: Youtube
+          url: https://www.youtube.com/oembed?url=TINYIBEMBED&format=json
+        - type: SoundCloud
+          url: https://soundcloud.com/oembed?format=json&url=TINYIBEMBED
+      # file control
+      maxkb: 16384
+      maxkbdesc: 16 MB
+      thumbnail: imagemagick
+      uploadviaurl: false
+      stripmetadata: true
+      nofileok: false
+      # thumb size - new thread
+      maxwop: 256
+      maxhop: 256
+      # thumb size - reply
+      maxw: 256
+      maxh: 256
+
+
+    ##
+    # Luovuus
+    ##
+
+
+    - # board desc / behavior
+      board: kuv
+      boarddesc: "Kuvataide"
+      alwaysnoko: true
+      report: true
+      autohide: 3
+      reqmod: ""
+      banmessage: true
+      updatebumped: true
+      spoilertext: true
+      spoilerimage: true
+      anonfile: true
+      duplicates: 0
+      overboard: false
+      autorefresh: 0
+      disallowthreads: ""
+      disallowreplies: ""
+      geoip: false
+      # board appearance
+      index: "index.html"
+      logo: ""
+      threadsperpage: 10
+      previewreplies: 5
+      truncate: 15
+      wordbreak: 80
+      expandwidth: 85
+      backlinks: true
+      catalog: true
+      json: true
+      hidefieldsop: []
+      hidefields: []
+      # post control
+      delay: 60
+      maxthreads: 100
+      maxreplies: 100
+      maxname: 75
+      maxemail: 320
+      maxsubject: 75
+      maxmessage: 8000
+      # upload types
+      uploads:
+        - mime: image/jpeg
+          ext: jpg
+        - mime: image/pjpeg
+          ext: jpg
+        - mime: image/png
+          ext: png
+        - mime: image/gif
+          ext: gif
+      # embed types
+      embeds: []
+      # file control
+      maxkb: 8192
+      maxkbdesc: 8 MB
+      thumbnail: imagemagick
+      uploadviaurl: false
+      stripmetadata: true
+      nofileok: true
+      # thumb size - new thread
+      maxwop: 256
+      maxhop: 256
+      # thumb size - reply
+      maxw: 256
+      maxh: 256
+
+    - # board desc / behavior
+      board: mus
+      boarddesc: "Musiikki"
+      alwaysnoko: true
+      report: true
+      autohide: 3
+      reqmod: ""
+      banmessage: true
+      updatebumped: true
+      spoilertext: true
+      spoilerimage: true
+      anonfile: true
+      duplicates: 0
+      overboard: false
+      autorefresh: 0
+      disallowthreads: ""
+      disallowreplies: ""
+      geoip: false
+      # board appearance
+      index: "index.html"
+      logo: ""
+      threadsperpage: 10
+      previewreplies: 5
+      truncate: 15
+      wordbreak: 80
+      expandwidth: 85
+      backlinks: true
+      catalog: true
+      json: true
+      hidefieldsop: []
+      hidefields: []
+      # post control
+      delay: 60
+      maxthreads: 100
+      maxreplies: 100
+      maxname: 75
+      maxemail: 320
+      maxsubject: 75
+      maxmessage: 8000
+      # upload types
+      uploads:
+        - mime: image/jpeg
+          ext: jpg
+        - mime: image/pjpeg
+          ext: jpg
+        - mime: image/png
+          ext: png
+        - mime: image/gif
+          ext: gif
+        - mime: audio/mp3
+          ext: mp3
+        - mime: audio/mpeg
+          ext: mp3
+      # embed types
+      embeds:
+        - type: Youtube
+          url: https://www.youtube.com/oembed?url=TINYIBEMBED&format=json
+        - type: SoundCloud
+          url: https://soundcloud.com/oembed?format=json&url=TINYIBEMBED
+      # file control
+      maxkb: 8192
+      maxkbdesc: 8 MB
+      thumbnail: imagemagick
+      uploadviaurl: false
+      stripmetadata: true
+      nofileok: true
+      # thumb size - new thread
+      maxwop: 256
+      maxhop: 256
+      # thumb size - reply
+      maxw: 256
+      maxh: 256
+
+    - # board desc / behavior
+      board: it
+      boarddesc: "Tietokonekulttuuri"
+      alwaysnoko: true
+      report: true
+      autohide: 3
+      reqmod: ""
+      banmessage: true
+      updatebumped: true
+      spoilertext: true
+      spoilerimage: true
+      anonfile: true
+      duplicates: 0
+      overboard: false
+      autorefresh: 0
+      disallowthreads: ""
+      disallowreplies: ""
+      geoip: false
+      # board appearance
+      index: "index.html"
+      logo: ""
+      threadsperpage: 10
+      previewreplies: 5
+      truncate: 15
+      wordbreak: 80
+      expandwidth: 85
+      backlinks: true
+      catalog: true
+      json: true
+      hidefieldsop: []
+      hidefields: []
+      # post control
+      delay: 60
+      maxthreads: 100
+      maxreplies: 100
+      maxname: 75
+      maxemail: 320
+      maxsubject: 75
+      maxmessage: 8000
+      # upload types
+      uploads:
+        - mime: image/jpeg
+          ext: jpg
+        - mime: image/pjpeg
+          ext: jpg
+        - mime: image/png
+          ext: png
+        - mime: image/gif
+          ext: gif
+        - mime: video/mp4
+          ext: mp4
+        - mime: video/webm
+          ext: webm
+        - mime: audio/mp3
+          ext: mp3
+        - mime: audio/mpeg
+          ext: mp3
+      # embed types
+      embeds:
+        - type: Youtube
+          url: https://www.youtube.com/oembed?url=TINYIBEMBED&format=json
+        - type: SoundCloud
+          url: https://soundcloud.com/oembed?format=json&url=TINYIBEMBED
+      # file control
+      maxkb: 8192
+      maxkbdesc: 8 MB
+      thumbnail: imagemagick
+      uploadviaurl: false
+      stripmetadata: true
+      nofileok: true
+      # thumb size - new thread
+      maxwop: 256
+      maxhop: 256
+      # thumb size - reply
+      maxw: 256
+      maxh: 256
+
+
+    ##
+    # Japani
+    ##
+
+
+    - # board desc / behavior
+      board: jp
+      boarddesc: "Otaku"
+      alwaysnoko: true
+      report: true
+      autohide: 3
+      reqmod: ""
+      banmessage: true
+      updatebumped: true
+      spoilertext: true
+      spoilerimage: true
+      anonfile: true
+      duplicates: 0
+      overboard: false
+      autorefresh: 0
+      disallowthreads: ""
+      disallowreplies: ""
+      geoip: false
+      # board appearance
+      index: "index.html"
+      logo: ""
+      threadsperpage: 10
+      previewreplies: 5
+      truncate: 15
+      wordbreak: 80
+      expandwidth: 85
+      backlinks: true
+      catalog: true
+      json: true
+      hidefieldsop: []
+      hidefields: []
+      # post control
+      delay: 60
+      maxthreads: 100
+      maxreplies: 100
+      maxname: 75
+      maxemail: 320
+      maxsubject: 75
+      maxmessage: 8000
+      # upload types
+      uploads:
+        - mime: image/jpeg
+          ext: jpg
+        - mime: image/pjpeg
+          ext: jpg
+        - mime: image/png
+          ext: png
+        - mime: image/gif
+          ext: gif
+        - mime: video/mp4
+          ext: mp4
+        - mime: video/webm
+          ext: webm
+        - mime: audio/mp3
+          ext: mp3
+        - mime: audio/mpeg
+          ext: mp3
+      # embed types
+      embeds:
+        - type: Youtube
+          url: https://www.youtube.com/oembed?url=TINYIBEMBED&format=json
+      # file control
+      maxkb: 8192
+      maxkbdesc: 8 MB
+      thumbnail: imagemagick
+      uploadviaurl: false
+      stripmetadata: true
+      nofileok: true
+      # thumb size - new thread
+      maxwop: 256
+      maxhop: 256
+      # thumb size - reply
+      maxw: 256
+      maxh: 256
+
+    - # board desc / behavior
+      board: a
+      boarddesc: "Anime"
+      alwaysnoko: true
+      report: true
+      autohide: 3
+      reqmod: ""
+      banmessage: true
+      updatebumped: true
+      spoilertext: true
+      spoilerimage: true
+      anonfile: true
+      duplicates: 0
+      overboard: false
+      autorefresh: 0
+      disallowthreads: ""
+      disallowreplies: ""
+      geoip: false
+      # board appearance
+      index: "index.html"
+      logo: ""
+      threadsperpage: 10
+      previewreplies: 5
+      truncate: 15
+      wordbreak: 80
+      expandwidth: 85
+      backlinks: true
+      catalog: true
+      json: true
+      hidefieldsop: []
+      hidefields: []
+      # post control
+      delay: 60
+      maxthreads: 100
+      maxreplies: 100
+      maxname: 75
+      maxemail: 320
+      maxsubject: 75
+      maxmessage: 8000
+      # upload types
+      uploads:
+        - mime: image/jpeg
+          ext: jpg
+        - mime: image/pjpeg
+          ext: jpg
+        - mime: image/png
+          ext: png
+        - mime: image/gif
+          ext: gif
+        - mime: video/mp4
+          ext: mp4
+        - mime: video/webm
+          ext: webm
+      # embed types
+      embeds:
+        - type: Youtube
+          url: https://www.youtube.com/oembed?url=TINYIBEMBED&format=json
+      # file control
+      maxkb: 8192
+      maxkbdesc: 8 MB
+      thumbnail: imagemagick
+      uploadviaurl: false
+      stripmetadata: true
+      nofileok: true
+      # thumb size - new thread
+      maxwop: 256
+      maxhop: 256
+      # thumb size - reply
+      maxw: 256
+      maxh: 256
+
+    - # board desc / behavior
+      board: m
+      boarddesc: "Manga"
+      alwaysnoko: true
+      report: true
+      autohide: 3
+      reqmod: ""
+      banmessage: true
+      updatebumped: true
+      spoilertext: true
+      spoilerimage: true
+      anonfile: true
+      duplicates: 0
+      overboard: false
+      autorefresh: 0
+      disallowthreads: ""
+      disallowreplies: ""
+      geoip: false
+      # board appearance
+      index: "index.html"
+      logo: ""
+      threadsperpage: 10
+      previewreplies: 5
+      truncate: 15
+      wordbreak: 80
+      expandwidth: 85
+      backlinks: true
+      catalog: true
+      json: true
+      hidefieldsop: []
+      hidefields: []
+      # post control
+      delay: 60
+      maxthreads: 100
+      maxreplies: 100
+      maxname: 75
+      maxemail: 320
+      maxsubject: 75
+      maxmessage: 8000
+      # upload types
+      uploads:
+        - mime: image/jpeg
+          ext: jpg
+        - mime: image/pjpeg
+          ext: jpg
+        - mime: image/png
+          ext: png
+        - mime: image/gif
+          ext: gif
+      # embed types
+      embeds: []
+      # file control
+      maxkb: 8192
+      maxkbdesc: 8 MB
+      thumbnail: imagemagick
+      uploadviaurl: false
+      stripmetadata: true
+      nofileok: true
+      # thumb size - new thread
+      maxwop: 256
+      maxhop: 256
+      # thumb size - reply
+      maxw: 256
+      maxh: 256
+
+
+    ##
+    # Sekalainen
+    ##
+
+
+    - # board desc / behavior
+      board: hikky
+      boarddesc: "Hikikomori"
+      alwaysnoko: true
+      report: true
+      autohide: 3
+      reqmod: ""
+      banmessage: true
+      updatebumped: true
+      spoilertext: true
+      spoilerimage: true
+      anonfile: true
+      duplicates: 4
+      overboard: false
+      autorefresh: 60
+      disallowthreads: ""
+      disallowreplies: ""
+      geoip: false
+      # board appearance
+      index: "index.html"
+      logo: ""
+      threadsperpage: 10
+      previewreplies: 5
+      truncate: 15
+      wordbreak: 80
+      expandwidth: 85
+      backlinks: true
+      catalog: true
+      json: true
+      hidefieldsop: []
+      hidefields: []
+      # post control
+      delay: 60
+      maxthreads: 100
+      maxreplies: 100
+      maxname: 75
+      maxemail: 320
+      maxsubject: 75
+      maxmessage: 8000
+      # upload types
+      uploads:
+        - mime: image/jpeg
+          ext: jpg
+        - mime: image/pjpeg
+          ext: jpg
+        - mime: image/png
+          ext: png
+        - mime: image/gif
+          ext: gif
+        - mime: video/mp4
+          ext: mp4
+        - mime: video/webm
+          ext: webm
+        - mime: audio/mp3
+          ext: mp3
+        - mime: audio/mpeg
+          ext: mp3
+      # embed types
+      embeds:
+        - type: Youtube
+          url: https://www.youtube.com/oembed?url=TINYIBEMBED&format=json
+      # file control
+      maxkb: 8192
+      maxkbdesc: 8 MB
+      thumbnail: imagemagick
+      uploadviaurl: false
+      stripmetadata: true
+      nofileok: false
+      # thumb size - new thread
+      maxwop: 256
+      maxhop: 256
+      # thumb size - reply
+      maxw: 256
+      maxh: 256
+
+    - # board desc / behavior
+      board: x
+      boarddesc: "Paranormaali"
+      alwaysnoko: true
+      report: true
+      autohide: 3
+      reqmod: ""
+      banmessage: true
+      updatebumped: true
+      spoilertext: true
+      spoilerimage: true
+      anonfile: true
+      duplicates: 4
+      overboard: false
+      autorefresh: 60
+      disallowthreads: ""
+      disallowreplies: ""
+      geoip: false
+      # board appearance
+      index: "index.html"
+      logo: ""
+      threadsperpage: 10
+      previewreplies: 5
+      truncate: 15
+      wordbreak: 80
+      expandwidth: 85
+      backlinks: true
+      catalog: true
+      json: true
+      hidefieldsop: []
+      hidefields: []
+      # post control
+      delay: 60
+      maxthreads: 100
+      maxreplies: 100
+      maxname: 75
+      maxemail: 320
+      maxsubject: 75
+      maxmessage: 8000
+      # upload types
+      uploads:
+        - mime: image/jpeg
+          ext: jpg
+        - mime: image/pjpeg
+          ext: jpg
+        - mime: image/png
+          ext: png
+        - mime: image/gif
+          ext: gif
+        - mime: video/mp4
+          ext: mp4
+        - mime: video/webm
+          ext: webm
+        - mime: audio/mp3
+          ext: mp3
+        - mime: audio/mpeg
+          ext: mp3
+      # embed types
+      embeds:
+        - type: Youtube
+          url: https://www.youtube.com/oembed?url=TINYIBEMBED&format=json
+      # file control
+      maxkb: 8192
+      maxkbdesc: 8 MB
+      thumbnail: imagemagick
+      uploadviaurl: false
+      stripmetadata: true
+      nofileok: false
+      # thumb size - new thread
+      maxwop: 256
+      maxhop: 256
+      # thumb size - reply
+      maxw: 256
+      maxh: 256
+
+
+    ##
+    # Sekalainen
+    ##
+
+
+    - # board desc / behavior
+      board: b
+      boarddesc: "Satunnainen"
+      alwaysnoko: true
+      report: true
+      autohide: 3
+      reqmod: ""
+      banmessage: true
+      updatebumped: true
+      spoilertext: true
+      spoilerimage: true
+      anonfile: true
+      duplicates: 4
+      overboard: false
+      autorefresh: 60
+      disallowthreads: ""
+      disallowreplies: ""
+      geoip: false
+      # board appearance
+      index: "index.html"
+      logo: ""
+      threadsperpage: 10
+      previewreplies: 3
+      truncate: 15
+      wordbreak: 80
+      expandwidth: 85
+      backlinks: true
+      catalog: true
+      json: true
+      hidefieldsop:
+        - subject
+      hidefields:
+        - subject
+      # post control
+      delay: 15
+      maxthreads: 200
+      maxreplies: 200
+      maxname: 75
+      maxemail: 320
+      maxsubject: 75
+      maxmessage: 8000
+      # upload types
+      uploads:
+        - mime: image/jpeg
+          ext: jpg
+        - mime: image/pjpeg
+          ext: jpg
+        - mime: image/png
+          ext: png
+        - mime: image/gif
+          ext: gif
+        - mime: video/mp4
+          ext: mp4
+        - mime: video/webm
+          ext: webm
+        - mime: audio/mp3
+          ext: mp3
+        - mime: audio/mpeg
+          ext: mp3
+        - mime: application/x-shockwave-flash
+          ext: swf
+          thumb: swf_thumbnail.png
+      # embed types
+      embeds:
+        - type: Youtube
+          url: https://www.youtube.com/oembed?url=TINYIBEMBED&format=json
+      # file control
+      maxkb: 24576
+      maxkbdesc: 24 MB
+      thumbnail: imagemagick
+      uploadviaurl: false
+      stripmetadata: true
+      nofileok: false
+      # thumb size - new thread
+      maxwop: 256
+      maxhop: 256
+      # thumb size - reply
+      maxw: 256
+      maxh: 256
+
+    - # board desc / behavior
+      board: pol
+      boarddesc: "Poliittisesti epäkorrekti"
+      alwaysnoko: true
+      report: true
+      autohide: 3
+      reqmod: ""
+      banmessage: true
+      updatebumped: true
+      spoilertext: true
+      spoilerimage: true
+      anonfile: true
+      duplicates: 4
+      overboard: false
+      autorefresh: 60
+      disallowthreads: ""
+      disallowreplies: ""
+      geoip: false
+      # board appearance
+      index: "index.html"
+      logo: ""
+      threadsperpage: 10
+      previewreplies: 5
+      truncate: 15
+      wordbreak: 80
+      expandwidth: 85
+      backlinks: true
+      catalog: true
+      json: true
+      hidefieldsop: []
+      hidefields: []
+      # post control
+      delay: 15
+      maxthreads: 100
+      maxreplies: 200
+      maxname: 75
+      maxemail: 320
+      maxsubject: 75
+      maxmessage: 8000
+      # upload types
+      uploads:
+        - mime: image/jpeg
+          ext: jpg
+        - mime: image/pjpeg
+          ext: jpg
+        - mime: image/png
+          ext: png
+        - mime: image/gif
+          ext: gif
+        - mime: video/mp4
+          ext: mp4
+        - mime: video/webm
+          ext: webm
+      # embed types
+      embeds:
+        - type: Youtube
+          url: https://www.youtube.com/oembed?url=TINYIBEMBED&format=json
+      # file control
+      maxkb: 8192
+      maxkbdesc: 8 MB
+      thumbnail: imagemagick
+      uploadviaurl: false
+      stripmetadata: true
+      nofileok: false
+      # thumb size - new thread
+      maxwop: 256
+      maxhop: 256
+      # thumb size - reply
+      maxw: 256
+      maxh: 256
+
+    - # board desc / behavior
+      board: int
+      boarddesc: "International"
+      alwaysnoko: true
+      report: true
+      autohide: 3
+      reqmod: ""
+      banmessage: true
+      updatebumped: true
+      spoilertext: true
+      spoilerimage: true
+      anonfile: true
+      duplicates: 4
+      overboard: false
+      autorefresh: 60
+      disallowthreads: ""
+      disallowreplies: ""
+      geoip: true
+      # board appearance
+      index: "index.html"
+      logo: ""
+      threadsperpage: 10
+      previewreplies: 3
+      truncate: 15
+      wordbreak: 80
+      expandwidth: 85
+      backlinks: true
+      catalog: true
+      json: true
+      hidefieldsop: []
+      hidefields: []
+      # post control
+      delay: 15
+      maxthreads: 200
+      maxreplies: 200
+      maxname: 75
+      maxemail: 320
+      maxsubject: 75
+      maxmessage: 8000
+      # upload types
+      uploads:
+        - mime: image/jpeg
+          ext: jpg
+        - mime: image/pjpeg
+          ext: jpg
+        - mime: image/png
+          ext: png
+        - mime: image/gif
+          ext: gif
+        - mime: video/mp4
+          ext: mp4
+        - mime: video/webm
+          ext: webm
+        - mime: audio/mp3
+          ext: mp3
+        - mime: audio/mpeg
+          ext: mp3
+        - mime: application/x-shockwave-flash
+          ext: swf
+          thumb: swf_thumbnail.png
+      # embed types
+      embeds:
+        - type: Youtube
+          url: https://www.youtube.com/oembed?url=TINYIBEMBED&format=json
+      # file control
+      maxkb: 24576
+      maxkbdesc: 24 MB
+      thumbnail: imagemagick
+      uploadviaurl: false
+      stripmetadata: true
+      nofileok: false
+      # thumb size - new thread
+      maxwop: 256
+      maxhop: 256
+      # thumb size - reply
+      maxw: 256
+      maxh: 256
+
+
+    ##
+    # Aikuisviihde
+    ##
+
+
+    - # board desc / behavior
+      board: h
+      boarddesc: "Hentai"
+      alwaysnoko: true
+      report: true
+      autohide: 3
+      reqmod: ""
+      banmessage: true
+      updatebumped: true
+      spoilertext: true
+      spoilerimage: true
+      anonfile: true
+      duplicates: 0
+      overboard: false
+      autorefresh: 60
+      disallowthreads: ""
+      disallowreplies: ""
+      geoip: false
+      # board appearance
+      index: "index.html"
+      logo: ""
+      threadsperpage: 10
+      previewreplies: 5
+      truncate: 15
+      wordbreak: 80
+      expandwidth: 85
+      backlinks: true
+      catalog: true
+      json: true
+      hidefieldsop: []
+      hidefields: []
+      # post control
+      delay: 60
+      maxthreads: 100
+      maxreplies: 100
+      maxname: 75
+      maxemail: 320
+      maxsubject: 75
+      maxmessage: 8000
+      # upload types
+      uploads:
+        - mime: image/jpeg
+          ext: jpg
+        - mime: image/pjpeg
+          ext: jpg
+        - mime: image/png
+          ext: png
+        - mime: image/gif
+          ext: gif
+        - mime: video/mp4
+          ext: mp4
+        - mime: video/webm
+          ext: webm
+      # embed types
+      embeds: []
+      # file control
+      maxkb: 24576
+      maxkbdesc: 24 MB
+      thumbnail: imagemagick
+      uploadviaurl: false
+      stripmetadata: true
+      nofileok: false
+      # thumb size - new thread
+      maxwop: 256
+      maxhop: 256
+      # thumb size - reply
+      maxw: 256
+      maxh: 256
+
+    - # board desc / behavior
+      board: e
+      boarddesc: "Ecchi"
+      alwaysnoko: true
+      report: true
+      autohide: 3
+      reqmod: ""
+      banmessage: true
+      updatebumped: true
+      spoilertext: true
+      spoilerimage: true
+      anonfile: true
+      duplicates: 0
+      overboard: false
+      autorefresh: 60
+      disallowthreads: ""
+      disallowreplies: ""
+      geoip: false
+      # board appearance
+      index: "index.html"
+      logo: ""
+      threadsperpage: 10
+      previewreplies: 5
+      truncate: 15
+      wordbreak: 80
+      expandwidth: 85
+      backlinks: true
+      catalog: true
+      json: true
+      hidefieldsop: []
+      hidefields: []
+      # post control
+      delay: 60
+      maxthreads: 100
+      maxreplies: 100
+      maxname: 75
+      maxemail: 320
+      maxsubject: 75
+      maxmessage: 8000
+      # upload types
+      uploads:
+        - mime: image/jpeg
+          ext: jpg
+        - mime: image/pjpeg
+          ext: jpg
+        - mime: image/png
+          ext: png
+        - mime: image/gif
+          ext: gif
+        - mime: video/mp4
+          ext: mp4
+        - mime: video/webm
+          ext: webm
+      # embed types
+      embeds: []
+      # file control
+      maxkb: 24576
+      maxkbdesc: 24 MB
+      thumbnail: imagemagick
+      uploadviaurl: false
+      stripmetadata: true
+      nofileok: false
+      # thumb size - new thread
+      maxwop: 256
+      maxhop: 256
+      # thumb size - reply
+      maxw: 256
+      maxh: 256
+
+
+    ##
+    # Minilauta
+    ##
+
+
+    - # board desc / behavior
+      board: meta
+      boarddesc: "Meta"
+      alwaysnoko: true
+      report: true
+      autohide: 0
+      reqmod: ""
+      banmessage: true
+      updatebumped: true
+      spoilertext: true
+      spoilerimage: false
+      anonfile: false
+      duplicates: 0
+      overboard: false
+      autorefresh: 0
+      disallowthreads: ""
+      disallowreplies: ""
+      geoip: false
+      # board appearance
+      index: "index.html"
+      logo: ""
+      threadsperpage: 10
+      previewreplies: 5
+      truncate: 15
+      wordbreak: 80
+      expandwidth: 85
+      backlinks: true
+      catalog: true
+      json: true
+      hidefieldsop: []
+      hidefields: []
+      # post control
+      delay: 60
+      maxthreads: 100
+      maxreplies: 0
+      maxname: 75
+      maxemail: 320
+      maxsubject: 75
+      maxmessage: 8000
+      # upload types
+      uploads: []
+      # embed types
+      embeds: []
+      # file control
+      maxkb: 8192
+      maxkbdesc: 8 MB
+      thumbnail: imagemagick
+      uploadviaurl: false
+      stripmetadata: true
+      nofileok: true
+      # thumb size - new thread
+      maxwop: 256
+      maxhop: 256
+      # thumb size - reply
+      maxw: 256
+      maxh: 256

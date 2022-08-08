@@ -1,0 +1,23 @@
+---
+
+- name: install aws apt pkgs
+  apt:
+    name:
+      - awscli
+    update_cache: no
+  register: aws_apt
+
+- name: configure cloudflare scripts
+  template:
+    src: cloudflare.sh.j2
+    dest: /usr/local/bin/cloudflare.sh
+    mode: "0740"
+  tags:
+    - configure
+
+- name: enable cloudflare cron job
+  cron:
+    name: update ec2 sg with cloudlfare IP ranges
+    minute: "0"
+    hour: "1"
+    job: "/usr/local/bin/cloudflare.sh >> /var/log/cloudflare.log 2>&1"

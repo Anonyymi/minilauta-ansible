@@ -1,0 +1,5 @@
+User-agent: {{ tinyib.main.robots.user_agent }}
+Crawl-delay: {{ tinyib.main.robots.crawl_delay }}
+{% for disallow_rule in tinyib.main.robots.disallow_rules %}
+Disallow: {{ disallow_rule }}
+{% endfor %}

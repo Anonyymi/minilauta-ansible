@@ -1,0 +1,37 @@
+---
+
+- name: install odrej/php repo
+  apt_repository:
+    repo: ppa:ondrej/php
+    state: present
+
+- name: install php apt pkgs
+  apt:
+    name:
+      - "php{{ php.version }}-{{ item }}"
+    update_cache: yes
+  register: php_apt
+  with_items: "{{ php.pkgs }}"
+
+- name: enable php mods
+  shell: "phpenmod {{ item }}"
+  with_items: "{{ php.mods }}"
+
+- name: install php ini
+  template:
+    src: php.ini.j2
+    dest: "/etc/php/{{ php.version }}/fpm/php.ini"
+
+- name: install pool conf
+  copy:
+    src: pool.d/www.conf
+    dest: "/etc/php/{{ php.version }}/fpm/pool.d/www.conf"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: enable php services
+  systemd:
+    name: "php{{ php.version }}-fpm"
+    state: restarted
+    enabled: yes

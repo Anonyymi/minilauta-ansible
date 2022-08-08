@@ -1,0 +1,53 @@
+---
+
+- name: install mariadb apt pkgs
+  apt:
+    name:
+      - mariadb-server
+      - mariadb-client
+      - mydumper
+    update_cache: no
+  register: mariadb_apt
+
+- name: install mariadb pip pkgs
+  pip:
+    name:
+      - PyMySQL
+  register: mariadb_pip
+
+- name: enable mariadb services
+  systemd:
+    name: mysqld
+    state: restarted
+    enabled: yes
+
+- name: del mariadb anon user
+  mysql_user:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: ""
+    host: "{{ item }}"
+    state: absent
+  with_items:
+    - 127.0.0.1
+    - ::1
+    - localhost
+
+- name: del mariadb test database
+  mysql_db:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: test
+    state: absent
+
+- name: add mariadb tinyib database
+  mysql_db:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: "{{ mariadb.database.tinyib.name }}"
+    state: present
+
+- name: add mariadb tinyib user
+  mysql_user:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: "{{ mariadb.user.tinyib.name }}"
+    password: "{{ mariadb.user.tinyib.password }}"
+    priv: "{{ mariadb.database.tinyib.name }}.*:ALL"
+    state: present
