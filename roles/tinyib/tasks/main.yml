@@ -16,9 +16,8 @@
   become: yes
   become_user: root
   git:
-    repo: git@github.com:Anonyymi/minilauta-tinyib.git
-    key_file: /root/.ssh/gitlab_access
-    dest: /var/www/tinyib.git
+    repo: https://github.com/Anonyymi/minilauta-tinyib.git
+    dest: /var/www/minilauta-tinyib.git
     single_branch: yes
     version: master
   register: tinyib_git
@@ -33,7 +32,7 @@
 
 - name: synchronize tinyib boards
   synchronize:
-    src: /var/www/tinyib.git/
+    src: /var/www/minilauta-tinyib.git/
     dest: "/var/www/tinyib/{{ item.board }}"
     rsync_opts:
       - "--exclude=.git/"
@@ -62,7 +61,7 @@
 
 - name: synchronize tinyib main page
   synchronize:
-    src: /var/www/tinyib.git/
+    src: /var/www/minilauta-tinyib.git/
     dest: "/var/www/tinyib"
     rsync_opts:
       - "--include=favicon.ico"

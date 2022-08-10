@@ -23,34 +23,10 @@
   with_items:
     - /root/.ssh
 
-- name: install git ssh key for gitlab
-  copy:
-    src: "{{ item.src }}"
-    dest: "/root/.ssh/{{ item.dest }}"
-    owner: root
-    group: root
-    mode: "0600"
-  with_items:
-    - src: gitlab_access
-      dest: gitlab_access
-    - src: gitlab_access.pub
-      dest: gitlab_access.pub
-
-- name: configure git ssh key for gitlab
-  template:
-    src: "{{ item.src }}"
-    dest: "/root/.ssh/{{ item.dest }}"
-    owner: root
-    mode: "0600"
-  with_items:
-    - src: ssh_config.j2
-      dest: config
-      identity_file: /root/.ssh/gitlab_access
-
 - name: configure git safe directories
   community.general.git_config:
     name: safe.directory
     value: "{{ item }}"
     scope: global
   with_items:
-    - /var/www/tinyib.git
+    - /var/www/minilauta-tinyib.git

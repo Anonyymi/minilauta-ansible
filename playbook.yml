@@ -3,7 +3,6 @@
 - name: bootstrap machine
   hosts:
     - prod
-    - test
   gather_facts: yes
   tasks:
     - name: update apt and install apt pkgs

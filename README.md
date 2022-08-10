@@ -2,7 +2,7 @@
 
 Ansible playbook + roles deploying a [TinyIB](https://github.com/Anonyymi/minilauta-tinyib) imageboard.
 
-## Vagrant operations
+## Vagrant operations (local dev env)
 ```bash
 # create machine
 vagrant up
@@ -12,7 +12,7 @@ vagrant provision
 vagrant ssh -c "cd /vagrant; ansible-playbook -i inventories/vagrant -t configure playbook.yml"
 ```
 
-## Ansible operations
+## Ansible operations (remote prod env)
 ```bash
 # deploy prod
 ansible-playbook -i inventories/prod playbook.yml
@@ -20,14 +20,23 @@ ansible-playbook -i inventories/prod playbook.yml
 ansible-playbook -i inventories/prod -t configure playbook.yml
 ```
 
+## Preparations (any env)
+
+1. Set `tinyib.init` & `tinyib.install_banners` to `true` on 1st provision
+
+## Preparations (remote prod env)
+
+1. Add private SSH key for ansible (production) deployments to `ssh/id_rsa`
+2. Add new ansible inventory `prod` and configure it properly
+
 ## Notes
 
-* create ssh folder with priv/pub keys for git repo access if pulling tinyib from private repo
-* the acme role won't obviously work in local vagrant environment
-* for production setups, you should create "prod" host with "prod" group and own group_vars
-* steps for taking new ubuntu server into use
-  * create server user
+* The acme-role won't obviously work in local vagrant environment
+* Steps for bootstrapping a fresh Ubuntu 20.04 server
+  * Create server user and group, eg. server:server
+  * Add the server user to following groups
     * adm dialout cdrom floppy sudo audio dip video plugdev netdev lxd
-  * create server ssh key
-  * modify sudoers sudo group perms
+  * Modify sudoers sudo group permissions
     * %sudo   ALL=(ALL:ALL) NOPASSWD: ALL
+  * Create a SSH key for the server
+    * Add the private SSH key as instructed in the `Preparations` section above
