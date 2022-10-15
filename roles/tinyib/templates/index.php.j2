@@ -43,7 +43,11 @@
           <div class="boards-cell">
             <strong>{{ category.name }}</strong><br>
             {% for board in category.boards %}
-              <a href="/{{ board.key }}/">{{ board.name }}</a><br>
+              {% if 'url' not in board %}
+                <a href="/{{ board.key }}/">{{ board.name }}</a><br>
+              {% else %}
+                <a href="{{ board.url }}" target="_blank">{{ board.name }}</a><br>
+              {% endif %}
             {% endfor %}
           </div>
         {% endfor %}

@@ -196,10 +196,18 @@ array(
     "name" => "{{ category.name }}",
     "boards" => array(
     {% for board in category.boards %}
-    array(
-        "name" => "{{ board.name }}",
-        "key" => "{{ board.key }}"
-    ),
+        {% if 'url' not in board %}
+            array(
+                "name" => "{{ board.name }}",
+                "key" => "{{ board.key }}"
+            ),
+        {% else %}
+            array(
+                "name" => "{{ board.name }}",
+                "key" => "{{ board.key }}",
+                "url" => "{{ board.url }}"
+            ),
+        {% endif %}
     {% endfor %}
     ),
 ),
