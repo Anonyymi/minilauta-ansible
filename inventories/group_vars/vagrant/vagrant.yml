@@ -1189,6 +1189,9 @@ tinyib:
           ext: mp4
         - mime: video/webm
           ext: webm
+        - mime: application/x-shockwave-flash
+          ext: swf
+          thumb: swf_thumbnail.png
       # embed types
       embeds: []
       # file control
@@ -1258,6 +1261,9 @@ tinyib:
           ext: mp4
         - mime: video/webm
           ext: webm
+        - mime: application/x-shockwave-flash
+          ext: swf
+          thumb: swf_thumbnail.png
       # embed types
       embeds: []
       # file control
